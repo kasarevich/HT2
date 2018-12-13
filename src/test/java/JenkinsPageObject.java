@@ -14,6 +14,10 @@ public class JenkinsPageObject {
     private final static String START_TITLE = "Sign in [Jenkins]";
     private final static String LOGIN = "aleksey";
     private final static String PASSWORD = "kasarevich";
+    private static final String ENABLE_TEXT = "ENABLE AUTO REFRESH";
+    private static final String MANAGE_USERS_TEXT = "Manage Users";
+    private static final String DESCRIDTION_MANAGE_USERS_TEXT = "Create/delete/modify users that can log in to this Jenkins";
+
     private WebDriverWait wait;
     private final WebDriver driver;
 
@@ -62,6 +66,9 @@ public class JenkinsPageObject {
     @FindBy(xpath = "//div[@id='main-panel']/form/span/span/button")
     private WebElement confirmDeleteButton;
 
+    @FindBy(xpath = "//div[@id='right-top-nav']/div/a")
+    private WebElement autoRefresh;
+
     public JenkinsPageObject(WebDriver driver){
         this.driver = driver;
         this.wait = new WebDriverWait(this.driver, 30);
@@ -107,8 +114,8 @@ public class JenkinsPageObject {
         try {
             while (i.hasNext()){
                 description = i.next();
-                if((description.findElement(By.tagName("dt")).getText().equalsIgnoreCase("Manage Users")) &&
-                        (description.findElement(By.tagName("dd")).getText().equalsIgnoreCase("Create/delete/modify users that can log in to this Jenkins"))){
+                if((description.findElement(By.tagName("dt")).getText().equalsIgnoreCase(MANAGE_USERS_TEXT)) &&
+                        (description.findElement(By.tagName("dd")).getText().equalsIgnoreCase(DESCRIDTION_MANAGE_USERS_TEXT))){
                     isPageFound = true;
                     break;
                 }
@@ -207,7 +214,12 @@ public class JenkinsPageObject {
         }
     }
 
-    // Проверка вхождения подстроки в текст страницы.«user/admin/delete».
+    public boolean isAutoRefreshEnabled(){
+        if(autoRefresh.getText().equalsIgnoreCase(ENABLE_TEXT)){
+            return true;
+        }else {return false;}
+    }
+
     public boolean pageTextContains(String search_string){
         return body.getText().contains(search_string);
     }
@@ -219,6 +231,11 @@ public class JenkinsPageObject {
             return "";
         }
     }
+
+    /*
+    Set fields
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
 
     public JenkinsPageObject signIn() {
         j_username.clear();
@@ -249,6 +266,13 @@ public class JenkinsPageObject {
         emailInputField.sendKeys(email);
         return this;
     }
+    /*
+    -----------------------------------------------------------------
+    */
+
+    /* Button clicks
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
 
     public JenkinsPageObject clickManageJenkins() {
         manageJenkins.click();
@@ -280,10 +304,11 @@ public class JenkinsPageObject {
         return this;
     }
 
-
-
-
-
-
-
+    public JenkinsPageObject clickAutoRefresh(){
+        autoRefresh.click();
+        return this;
+    }
+/*
+    ----------------------------------------------------------------
+*/
 }
