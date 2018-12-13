@@ -18,6 +18,10 @@ public class TestJenkins {
     private static final String MANAGE_USERS_TEXT = "Manage Users";
     private static final String MANAGE_USERS_SUB_TEXT = "Create/delete/modify users that can log in to this Jenkins";
     private static final String ERROR_MESSAGE_REF_TO_CREATE_NOT_AVAILABLE = "The reference to \"Create User\" is not available!";
+    private static final String USERNAME = "someuser";
+    private static final String PASSWORD = "somepassword";
+    private static final String FULLNAME = "Some Full Name";
+    private static final String EMAIL = "some@addr.dom";
 
     StringBuffer verificationErrors = new StringBuffer();
     WebDriver driver = null;
@@ -77,6 +81,32 @@ public class TestJenkins {
 
     @Test(dependsOnMethods = "testCreateUser")
     public void testAddNewUser(){
+        Assert.assertTrue(
+                jenkinsPageObject
+                .setUsername(USERNAME)
+                .setPassword(PASSWORD)
+                .setConfirmPassword(PASSWORD)
+                .setFullName(FULLNAME)
+                .setEmail(EMAIL)
+                        .clickCreateNewUserWithData()
+                            .isNewUserAdded()// fixme message
+        );
+    }
+    //После клика по ссылке с атрибутом href равным «user/someuser/delete» появляется текст «Are you sure about deleting the user from Jenkins?».
 
+  /*  5.	После клика по ссылке с атрибутом href равным «user/someuser/delete» появляется текст «Are you sure about deleting the user from Jenkins?».
+            6.	После клика по кнопке с надписью «Yes» на странице отсутствует строка таблицы (элемент tr), с ячейкой (элемент td) с текстом «someuser».
+             На странице отсутствует ссылка с атрибутом href равным «user/someuser/delete».
+            7.	{На той же странице, без выполнения каких бы то ни было действий}. На странице отсутствует ссылка с атрибутом href равным «user/admin/delete».
+*/
+
+    @Test(dependsOnMethods = "testAddNewUser")
+    public void testDeleteUser(){
+        jenkinsPageObject.clickDeleteUser();
+        Assert.assertTrue(jenkinsPageObject.getErrorOnTextAbsence("Are you sure about deleting the user from Jenkins?").equalsIgnoreCase(""));
+        jenkinsPageObject.clickConfirmDelete();
+        Assert.assertFalse(jenkinsPageObject.isNewUserAdded());
+        Assert.assertFalse(jenkinsPageObject.isDeleteButtonDisplayed());
+        Assert.assertFalse(jenkinsPageObject.isDeleteAdminPresentForReal());
     }
 }

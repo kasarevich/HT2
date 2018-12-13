@@ -4,10 +4,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 public class JenkinsPageObject {
     private final static String START_URL = "http://localhost:8080/login?from=%2F";
@@ -53,6 +53,14 @@ public class JenkinsPageObject {
     @FindBy(xpath = "//*[@id='main-panel']/form/div/table/tbody/tr/td/input[@name='email']")
     private WebElement emailInputField;
 
+    @FindBy(xpath = "//div[@id='main-panel']/form/span/span/button")
+    private WebElement createUserButton;
+
+    @FindBy(xpath = "//table[@id='people']/tbody/tr/td/a[@href='user/someuser/delete']")
+    private WebElement deleteButton;
+
+    @FindBy(xpath = "//div[@id='main-panel']/form/span/span/button")
+    private WebElement confirmDeleteButton;
 
     public JenkinsPageObject(WebDriver driver){
         this.driver = driver;
@@ -158,7 +166,48 @@ public class JenkinsPageObject {
         return false;
     }
 
-    // Проверка вхождения подстроки в текст страницы.
+    public boolean isNewUserAdded(){
+        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//html/body"), 1));
+        Collection<WebElement> refs = driver.findElements(By.tagName("a"));
+        if (refs.isEmpty()){
+            return false;
+        }
+        Iterator<WebElement> i = refs.iterator();
+        boolean isFormFound = false;
+        WebElement ref = null;
+        try {
+            while (i.hasNext()){
+                ref = i.next();
+                if(ref.getText().equalsIgnoreCase("someuser")){
+                    isFormFound = true;
+                    break;
+                }
+            }
+        }catch (NoSuchElementException e){
+            isFormFound = false;
+        }
+        return isFormFound;
+    }
+
+    public boolean isDeleteButtonDisplayed(){
+        try {
+            deleteButton.click();
+        }catch (NoSuchElementException e){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isDeleteAdminPresentForReal(){
+        try {
+            driver.findElement(By.xpath("//a[@href='user/admin/delete']"));
+                return true;
+        }catch (NoSuchElementException e){
+           return false;
+        }
+    }
+
+    // Проверка вхождения подстроки в текст страницы.«user/admin/delete».
     public boolean pageTextContains(String search_string){
         return body.getText().contains(search_string);
     }
@@ -215,6 +264,23 @@ public class JenkinsPageObject {
         createUser.click();
         return this;
     }
+
+    public JenkinsPageObject clickCreateNewUserWithData(){
+        createUserButton.click();
+        return this;
+    }
+
+    public JenkinsPageObject clickDeleteUser(){
+        deleteButton.click();
+        return this;
+    }
+
+    public JenkinsPageObject clickConfirmDelete(){
+        confirmDeleteButton.click();
+        return this;
+    }
+
+
 
 
 
